@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Salvo Bay · test page</title>
+<style>html,body{margin:0;height:100%;background:#141a2c}#game{position:fixed;inset:0}</style></head>
+<body><div id="game"></div>
+<script type="module">
+  import { play } from "/dist/salvo-bay.mjs";
+  const q = new URLSearchParams(location.search);
+  if (q.get("theme")) document.documentElement.dataset.theme = q.get("theme");
+  window.app = play(document.getElementById("game"), { rooms: q.get("rooms") ?? "" });
+</script>
+</body></html>

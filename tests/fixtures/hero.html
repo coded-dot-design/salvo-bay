@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Salvo Bay · hero test</title>
+<style>html,body{margin:0;background:#141a2c}#hero{height:80vh}</style></head>
+<body><div id="hero"></div><p style="height:200vh">below</p>
+<script type="module">
+  import { hero } from "/dist/salvo-bay-hero.mjs";
+  const q = new URLSearchParams(location.search);
+  if (q.get("theme")) document.documentElement.dataset.theme = q.get("theme");
+  window.h = hero(document.getElementById("hero"), {});
+</script>
+</body></html>

@@ -1,0 +1,30 @@
+---
+// The game: the whole stage under the header (dist/salvo-bay.mjs `play`): the menu over an attract
+// battle, solo against three bots, pass and play, or online over a fizlet-rooms room.
+import Base from '../../layouts/Base.astro';
+import { ROOMS } from '../../site';
+const description = 'Play Salvo Bay: solo against an easy, normal or hard bot, pass and play on one screen, or online with a friend. Classic 8 × 8 or the big 10 × 10 bay.';
+---
+<Base title="Play Salvo Bay" description={description} page="play" app>
+  <Fragment slot="head">
+    <!-- An invite code in a link (?code=) is taken out of the address bar before anything else loads. -->
+    <meta name="referrer" content="no-referrer" />
+    <script is:inline>
+      (function () {
+        var u = new URL(location.href), p = u.searchParams, c = p.get("code");
+        if (!p.has("code")) return;
+        p.delete("code");
+        history.replaceState(history.state, "", u.pathname + u.search + u.hash);
+        if (c) window.__salvoInvite = c;
+      })();
+    </script>
+  </Fragment>
+  <h1 class="vh">Play Salvo Bay</h1>
+  <div class="sb-game" id="game" data-rooms={ROOMS}></div>
+</Base>
+
+<script>
+  import { play } from "../../../../dist/salvo-bay.mjs";
+  const el = document.getElementById("game")!;
+  (window as unknown as { app: unknown }).app = play(el, { rooms: el.dataset.rooms });
+</script>

@@ -1,0 +1,5 @@
+node_modules/
+artifacts/
+test-results/
+.astro/
+.DS_Store

@@ -1,0 +1,44 @@
+name: Salvo Bay checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  check:
+    # Pinned: ubuntu-latest is moving to 26.04, which Playwright 1.58 does not support yet.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      # Typecheck, build dist/, the size budgets.
+      - run: npm run check
+      # dist/ is what the site ships: it must be the build of this commit.
+      - run: git diff --exit-code -- dist site/src/sizes.json
+      - run: node -e "const p=require('./package.json'); if (Object.keys(p.dependencies||{}).length) { console.error('Salvo Bay ships no runtime dependencies'); process.exit(1) }"
+      # The model: placement, shots, the bots, commit and reveal; the sim step allocates nothing.
+      - run: npm test
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:settle
+      - run: npm run test:browser
+      - run: npm run site:build
+      - run: npm run test:site
+  tag-version:
+    needs: check
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: |
+          tag="v$(node -p 'require("./package.json").version')"
+          git fetch origin --tags
+          if git show-ref --verify --quiet "refs/tags/$tag"; then exit 0; fi
+          git tag "$tag"
+          git push origin "$tag"

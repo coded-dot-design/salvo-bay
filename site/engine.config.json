@@ -1,0 +1,29 @@
+{
+  "$comment": "astro-base-engine config for the Salvo Bay site (salvobay.domvirus.com). Run the engine with --site site. The landing page is hand-built Astro (site/src/pages/index.astro: its hero is the game); the play page is the game (app mode) and stays outside the engine's page types.",
+  "brand": {
+    "name": "Salvo Bay",
+    "siteUrl": "https://salvobay.domvirus.com",
+    "defaultImage": "/shots/og.png",
+    "author": {
+      "name": "Chris Cooley",
+      "url": "https://coded.design/"
+    }
+  },
+  "pageTypes": {
+    "home": {
+      "template": "marketing",
+      "path": "/",
+      "eyebrow": "Board game",
+      "schemaPageType": "VideoGame",
+      "requires": [
+        "hero"
+      ]
+    }
+  },
+  "checks": {
+    "jsAllowed": [
+      "/",
+      "/play/*"
+    ]
+  }
+}

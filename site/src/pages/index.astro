@@ -1,0 +1,95 @@
+---
+// Salvo Bay, the landing page. The hero is the game itself playing itself (dist/salvo-bay-hero.mjs):
+// two bots trade shells across the table; it sleeps once the battle is won and wakes when you come
+// back; a tap on the table starts a solo game right there. Reduced motion: a still frame of a volley.
+import Base from '../layouts/Base.astro';
+import { base, FIZLET } from '../site';
+import sizes from '../sizes.json';
+const description = 'Salvo Bay: a ship-hunting duel on a cutaway tabletop diorama. Place your fleet, trade shells that arc over the table, sink ships you can still see on the bottom. Solo against three bots, pass and play, or online. Free, in your browser.';
+const steps = [
+  ['PLACE', 'Hide your fleet', 'Pick a ship on the dock, then a cell in your bay. R turns it, RANDOM deals a fleet. Four ships on the classic 8 × 8 bay, five on the big bay.'],
+  ['FIRE', 'Call a cell', 'Tap a cell in the enemy bay. The shell arcs over the table: a splash and a white peg is a miss, a fireball and a red peg is a hit.'],
+  ['SINK', 'Finish what you hit', 'Hit every cell of a ship and it rolls over and settles on the bottom, where you can still see it through the water.'],
+  ['WIN', 'Clear the bay', 'Sink their whole fleet before they sink yours. The end card has your shots, accuracy, best streak and time.'],
+];
+const features = [
+  ['Three bots', 'Easy fires at random. Normal hunts on a checkerboard. Hard counts every place your ships could still be. Measured over 300 matches each, to sink a classic fleet they take 41.7, 33.4 and 29.0 shots.'],
+  ['Pass and play', 'Two people, one screen. A curtain hides each fleet while you hand over, and the table turns to whoever is firing.'],
+  ['Online', 'Two screens over a room server, with an invite code and a link to send. Fleets never cross the wire until the end, when each is checked against the hash it locked in and every answer it gave.'],
+  ['Two bays', 'Classic: 8 × 8 and four ships. Big bay: 10 × 10 and five, with the Walrus.'],
+  ['Night watch', 'Switch to night and the lighthouse sweeps the bay. Orbit the table with a drag, pinch to zoom, or pick a view.'],
+  ['Shot log and stats', 'Every shot in the log, a turn banner, rematch, and your record against each bot on this device.'],
+];
+---
+<Base title="Salvo Bay · a ship-hunting duel on a tabletop" description={description}>
+  <section class="sb-hero" aria-labelledby="hero-title">
+    <div class="sb-hero-game" id="hero" aria-label="Salvo Bay playing itself: tap the table to play"></div>
+    <div class="wrap sb-hero-copy">
+      <p class="eyebrow"><span class="dot"></span> A DIORAMA GAME · BY CHRIS COOLEY</p>
+      <h1 id="hero-title">Salvo Bay.<br /><em>Sink what you can't see.</em></h1>
+      <p class="lead">A ship-hunting duel on a cutaway tabletop: two glass trays of water, a dock, a fort and a lighthouse. Hide your fleet, then trade shells across the table.</p>
+      <div class="ctas">
+        <a class="bui-key sb-big-play" href={base('play/')}>PLAY</a>
+        <span class="sb-tap">or tap the table to play right here</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="how">
+    <div class="wrap">
+      <p class="eyebrow"><span class="index">01</span> HOW TO PLAY</p>
+      <h2>Place. Fire. Sink. <em>Win.</em></h2>
+      <ol class="cards4">{steps.map(([k, t, b], i) => <li class="panel"><span class="n">0{i + 1}</span><p class="eyebrow"><b>{k}</b></p><h3>{t}</h3><p>{b}</p></li>)}</ol>
+      <p class="keys-line"><kbd>arrows</kbd> move the cursor · <kbd>Enter</kbd> places or fires · <kbd>R</kbd> turns a ship · <kbd>X</kbd> random fleet · <kbd>S</kbd> start · <kbd>V</kbd> view · <kbd>L</kbd> log · <kbd>P</kbd> pause · <kbd>M</kbd> mute. Phones: tap a ship, tap a cell; drag to orbit, pinch to zoom.</p>
+    </div>
+  </section>
+
+  <section class="section" id="features">
+    <div class="wrap">
+      <p class="eyebrow"><span class="index">02</span> WHAT'S IN THE BOX</p>
+      <h2>A whole harbour on one table.</h2>
+      <ul class="cards3">{features.map(([t, b]) => <li class="panel"><h3>{t}</h3><p>{b}</p></li>)}</ul>
+      <p><a class="bui-key" href={base('play/?mode=online')}>PLAY ONLINE</a> <a class="bui-key" href={base('play/?mode=local')}>PASS AND PLAY</a></p>
+    </div>
+  </section>
+
+  <section class="section" id="built">
+    <div class="wrap built">
+      <div>
+        <p class="eyebrow"><span class="index">03</span> BUILT ON FIZLET</p>
+        <h2>No libraries. <em>No engine but a tiny one.</em></h2>
+        <p>The whole table, every ship, shell, splash and the lighthouse's beam, is software 3D on a plain 2D canvas, from <a href={FIZLET}>Fizlet</a>'s bricks. No runtime dependencies, no WebGL, no images.</p>
+        <ul class="bricks">
+          <li><code>@fzlt/core/kernel</code> the fixed-step loop, settle and Recall</li>
+          <li><code>@fzlt/core/diorama</code> shapes, the depth sort, shadows, picking</li>
+          <li><code>@fzlt/core/sound</code> the cues</li>
+          <li><code>@fzlt/core/presence</code> the room for online play</li>
+          <li><code>@fzlt/core/ui</code> the Board UI keys and cards</li>
+        </ul>
+      </div>
+      <div class="panel sizes">
+        <p class="eyebrow"><b>MEASURED</b> · GZIP</p>
+        <dl>
+          <div><dt>The whole game</dt><dd>{(sizes.game / 1024).toFixed(1)} KB</dd></div>
+          <div><dt>This hero</dt><dd>{(sizes.hero / 1024).toFixed(1)} KB</dd></div>
+        </dl>
+        <p class="fine">Built {sizes.date}, from dist/ in the repo. The game's step allocates nothing: 0 young GCs over 200,000 sim steps.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section byline">
+    <div class="wrap">
+      <p class="eyebrow"><span class="index">04</span> BY CHRIS COOLEY</p>
+      <h2>Made at <a href="https://coded.design/">coded.design</a>.</h2>
+      <p>Salvo Bay started as a tiny game in Fizlet's daily gallery (#102) and grew up into this. It is open source (MIT), and part of the DOM VIRUS family of games.</p>
+    </div>
+  </section>
+</Base>
+
+<script>
+  import { hero } from "../../../dist/salvo-bay-hero.mjs";
+  const host = document.getElementById("hero")!;
+  const play = new URL("play/", document.baseURI).href;
+  hero(host, { onPlay: () => document.body.classList.add("hero-playing"), menu: () => (location.href = play) });
+</script>

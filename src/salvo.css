@@ -1,0 +1,731 @@
+/* Salvo Bay: the stage and everything over it, inside the game's own shadow root (with Fizlet's
+   Board UI kit). The diorama draws on the stage's canvas; over it, a transparent key takes the
+   pointer and the keyboard's focus, Board UI stickers show the turn and the fleets, a line of help
+   sits under them, the shot log holds the right edge, the banner sweeps across on a new turn, and
+   the cards (end, pass-and-play curtain, pause, menu, room) come up in the middle. Day (light) is a
+   bright afternoon; night (dark) is the bay under the lighthouse. Flat colours, bold ink outlines,
+   hard shadows. */
+.sb-app {
+  --sb-font: ui-rounded, "SF Pro Rounded", Nunito, "Segoe UI", system-ui, sans-serif;
+  --ink: #1f2433;
+  --rim: #1f2433;
+  --surface: #fffaf1;
+  --raised: #f3ead9;
+  --card: #fffaf1;
+  --muted: #5d6175;
+  --line: #d8cdb8;
+  --bg: #141a2c;
+  --k-go: #7fcfa8;
+  --k-sys: #8fd3f0;
+  --k-cmd: #a99be0;
+  --k-fire: #f08e6f;
+  --k-flag: #fffaf1;
+  --sb-you: #f08e6f;
+  --sb-foe: #8f9dc6;
+  --sb-sun: #f2c96b;
+  --sb-hit: #e5484d;
+  --sb-text: #f4efe4;
+  --sb-shade: #141a2c;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--sb-font);
+  background: #141a2c;
+  color: var(--ink);
+  -webkit-tap-highlight-color: transparent;
+}
+.sb-app[data-theme="light"] {
+  --bg: #efe8de;
+  --sb-text: #1f2433;
+  --sb-shade: #efe8de;
+  background: #efe8de;
+}
+.sb-app *,
+.sb-app *::before,
+.sb-app *::after {
+  box-sizing: border-box;
+}
+.sb-stage {
+  position: absolute;
+  inset: 0;
+  container: stage / size;
+  contain: strict;
+  overflow: hidden;
+}
+.sb-stage > canvas,
+.sb-stage > .sb-play {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+.sb-stage > canvas {
+  pointer-events: none;
+}
+.sb-stage > .sb-play {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  transition: none;
+  cursor: grab;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+  outline-offset: -4px;
+}
+.sb-stage > .sb-play.sb-aim {
+  cursor: crosshair;
+}
+.sb-stage > .sb-play.sb-drag {
+  cursor: grabbing;
+}
+/* The keyboard's focus shows on the table itself: the cursor's reticle on the bay. */
+.sb-stage > .sb-play:focus-visible {
+  outline: none;
+}
+.sb-hud {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  font: 800 clamp(11px, 1.15cqw, 15px) / 1.2 var(--sb-font);
+  color: var(--ink);
+}
+.sb-attract .sb-head,
+.sb-attract .sb-log,
+.sb-attract .sb-card,
+.sb-attract + .gk-bar,
+.sb-attract ~ .gk-bar,
+.sb-attract .sb-banner {
+  display: none !important;
+}
+.sb-head {
+  position: absolute;
+  left: max(10px, env(safe-area-inset-left));
+  top: 10px;
+  right: 150px;
+  display: grid;
+  gap: 6px;
+  justify-items: start;
+}
+.sb-top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+  margin: 0;
+}
+.sb-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  padding: 0.42em 0.75em;
+  background: var(--surface);
+  color: var(--ink);
+  border: 2px solid var(--rim);
+  border-radius: 8px;
+  box-shadow: calc(3px * var(--bui-sx)) calc(3px * var(--bui-sy)) 0 var(--bui-shadow);
+  white-space: nowrap;
+}
+.sb-chip em {
+  font-style: normal;
+}
+.sb-chip span {
+  font-variant-numeric: tabular-nums;
+  margin-right: 0.35em;
+}
+.sb-dot {
+  display: inline-block;
+  width: 0.72em;
+  height: 0.72em;
+  border: 2px solid var(--rim);
+  border-radius: 50%;
+  background: var(--sb-you);
+}
+.sb-dot.sb-foe {
+  background: var(--sb-foe);
+}
+.sb-turn {
+  rotate: -1.5deg;
+  font-size: 1.08em;
+}
+.sb-place {
+  background: var(--k-go);
+}
+.sb-you {
+  background: var(--sb-you);
+}
+.sb-them {
+  background: var(--sb-foe);
+}
+.sb-over {
+  background: var(--sb-sun);
+}
+.sb-hint {
+  min-height: 1.2em;
+  padding: 0 2px;
+  margin: 0;
+  font-size: 0.95em;
+  color: var(--sb-text);
+  text-shadow: 0 1px 0 var(--sb-shade), 0 0 4px var(--sb-shade), 0 0 8px var(--sb-shade);
+}
+.sb-live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  margin: 0;
+}
+
+/* The banner: a big sticker that sweeps in from the left on a new turn, holds, and goes. */
+.sb-banner {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 38%;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  opacity: 0;
+  translate: -60% 0;
+  transition: translate 0.38s cubic-bezier(0.34, 1.5, 0.5, 1), opacity 0.2s;
+}
+.sb-banner b {
+  padding: 0.35em 1.1em 0.4em;
+  font-size: clamp(22px, 4.2cqw, 46px);
+  letter-spacing: 0.01em;
+  background: var(--surface);
+  color: var(--ink);
+  border: 3px solid var(--rim);
+  border-radius: 12px;
+  box-shadow: calc(6px * var(--bui-sx)) calc(6px * var(--bui-sy)) 0 var(--bui-shadow);
+  rotate: -2deg;
+  white-space: nowrap;
+}
+.sb-banner.sb-b1 b {
+  background: var(--sb-you);
+}
+.sb-banner.sb-b2 b {
+  background: var(--sb-foe);
+}
+.sb-banner.sb-on {
+  opacity: 1;
+  translate: 0 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sb-banner {
+    translate: 0 0;
+    transition: opacity 0.2s;
+  }
+}
+
+/* The shot log: newest first, on the right edge (wide), or over the table when LOG opens it (narrow). */
+.sb-log {
+  position: absolute;
+  right: max(10px, env(safe-area-inset-right));
+  top: 64px;
+  width: 15.5em;
+  max-height: calc(100% - 140px);
+  display: none;
+  flex-direction: column;
+  background: var(--surface);
+  border: 2px solid var(--rim);
+  border-radius: 10px;
+  box-shadow: calc(4px * var(--bui-sx)) calc(4px * var(--bui-sy)) 0 var(--bui-shadow);
+  overflow: hidden;
+  pointer-events: auto;
+}
+.sb-log.sb-open {
+  display: flex;
+}
+.sb-log h2 {
+  margin: 0;
+  padding: 0.5em 0.8em;
+  font: inherit;
+  font-size: 0.82em;
+  letter-spacing: 0.12em;
+  border-bottom: 2px solid var(--rim);
+  background: var(--raised);
+}
+.sb-log ol {
+  margin: 0;
+  padding: 0.3em 0;
+  list-style: none;
+  overflow: auto;
+}
+.sb-log li {
+  display: grid;
+  grid-template-columns: 0.8em 4.6em 2.6em 1fr;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.22em 0.8em;
+  font-size: 0.9em;
+  color: var(--muted);
+}
+.sb-log li:first-child {
+  color: var(--ink);
+}
+.sb-log li i {
+  width: 0.7em;
+  height: 0.7em;
+  border: 2px solid var(--rim);
+  border-radius: 50%;
+  background: var(--sb-you);
+}
+.sb-log li.sb-l2 i {
+  background: var(--sb-foe);
+}
+.sb-log li b {
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+.sb-log li em {
+  font-style: normal;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sb-log li.sb-lhit em {
+  color: var(--sb-hit);
+}
+
+/* The cards: end, curtain, pause (and the app's menu and room card share the look). */
+.sb-card {
+  position: absolute;
+  left: 50%;
+  top: 48%;
+  translate: -50% -50%;
+  rotate: -1deg;
+  display: grid;
+  justify-items: center;
+  gap: 0.55em;
+  width: min(calc(100% - 28px), 25em);
+  max-height: calc(100% - 24px);
+  overflow: auto;
+  padding: 1.1em 1.3em 1.2em;
+  background: var(--surface);
+  color: var(--ink);
+  border: 3px solid var(--rim);
+  border-radius: 14px;
+  box-shadow: calc(7px * var(--bui-sx)) calc(7px * var(--bui-sy)) 0 var(--bui-shadow);
+  text-align: center;
+  pointer-events: auto;
+  font-size: clamp(13px, 1.25cqw, 16px);
+}
+.sb-card[hidden] {
+  display: none;
+}
+.sb-card > small {
+  font-size: 0.78em;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+}
+.sb-card > b {
+  font-size: 2.1em;
+  line-height: 1.05;
+}
+.sb-card p {
+  margin: 0;
+  color: var(--muted);
+  font-weight: 700;
+}
+.sb-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.4em;
+  width: 100%;
+  margin: 0.2em 0;
+}
+.sb-stats div {
+  padding: 0.45em 0.2em;
+  background: var(--raised);
+  border: 2px solid var(--rim);
+  border-radius: 8px;
+}
+.sb-stats dt {
+  font-size: 0.72em;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.sb-stats dd {
+  margin: 0.1em 0 0;
+  font-size: 1.35em;
+  font-variant-numeric: tabular-nums;
+}
+.sb-card .sb-best {
+  font-size: 0.85em;
+}
+.sb-card .sb-check {
+  font-size: 0.85em;
+  color: var(--ink);
+}
+.sb-card .sb-check:empty,
+.sb-card .sb-best:empty {
+  display: none;
+}
+.sb-cardkeys {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 0.3em;
+}
+.sb-app .sb-card .bui-key,
+.sb-app .sb-menu-card .bui-key,
+.sb-app .sb-room .bui-key {
+  min-height: 44px;
+  padding: 0 1.1em;
+  font: 800 0.95em/1 var(--sb-font);
+  letter-spacing: 0.04em;
+}
+.sb-app .sb-again,
+.sb-app .sb-ready,
+.sb-app .sb-resume,
+.sb-app .sb-go-key {
+  background: var(--k-go);
+  color: var(--rim);
+}
+.sb-curtain {
+  width: min(calc(100% - 28px), 24em);
+}
+.sb-stage.sb-curtained > canvas {
+  filter: blur(14px) saturate(0.6);
+}
+.sb-stage.sb-curtained::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--bg) 55%, transparent);
+  pointer-events: none;
+}
+.sb-curtain {
+  z-index: 3;
+}
+
+/* The keys strip (src/keys.ts): small Board UI keys on the bottom edge. Wide: mute at the left
+   end, the play keys at the right. Narrow: mute in the top corner, the play keys spread along the
+   bottom. 44 px or more. */
+.gk-bar {
+  position: absolute;
+  left: max(8px, env(safe-area-inset-left));
+  right: max(8px, env(safe-area-inset-right));
+  bottom: max(8px, env(safe-area-inset-bottom));
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: 6px;
+  pointer-events: none;
+}
+.sb-app .gk {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  min-width: 44px;
+  height: 44px;
+  padding: 0 14px;
+  font: 800 13px/1 var(--sb-font);
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  overflow: hidden;
+  pointer-events: auto;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.sb-app .gk[hidden] {
+  display: none;
+}
+.sb-app .gk[disabled] {
+  opacity: 0.45;
+}
+.sb-app .gk b {
+  font-weight: inherit;
+}
+.sb-app .gk[aria-label^="Mute"] {
+  order: -1;
+  width: 44px;
+  padding: 0;
+  margin-right: auto;
+}
+.sb-app .gk.sb-go:not([disabled]) {
+  background: var(--k-go);
+  color: var(--rim);
+}
+.sb-app .gk.sb-logk[aria-pressed="true"] {
+  background: var(--sb-sun);
+  color: var(--rim);
+}
+
+/* The app's corner keys (pause, theme) over the stage, top right. */
+.sb-corner {
+  position: absolute;
+  top: 10px;
+  right: max(10px, env(safe-area-inset-right));
+  display: flex;
+  gap: 6px;
+  z-index: 2;
+}
+.sb-app .sb-corner .bui-key {
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  display: inline-grid;
+  place-items: center;
+  font: 800 15px/1 var(--sb-font);
+}
+
+/* The menu and the room card. */
+.sb-menu-card,
+.sb-room {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  z-index: 4;
+  display: grid;
+  gap: 0.8em;
+  width: min(calc(100% - 24px), 27em);
+  max-height: calc(100% - 24px);
+  overflow: auto;
+  padding: 1.1em 1.2em 1.2em;
+  background: var(--surface);
+  color: var(--ink);
+  border: 3px solid var(--rim);
+  border-radius: 14px;
+  box-shadow: calc(7px * var(--bui-sx)) calc(7px * var(--bui-sy)) 0 var(--bui-shadow);
+  font-size: clamp(13px, 1.2cqw, 16px);
+}
+.sb-menu-card[hidden],
+.sb-room[hidden],
+.sb-room [hidden] {
+  display: none !important;
+}
+.sb-menu-card h2,
+.sb-room h2 {
+  margin: 0;
+  font-size: 2em;
+  line-height: 1;
+  rotate: -1.5deg;
+}
+.sb-menu-card h2 small,
+.sb-room h2 small {
+  display: block;
+  margin-top: 0.35em;
+  font-size: 0.4em;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+  rotate: 1.5deg;
+}
+.sb-pick {
+  display: grid;
+  gap: 0.35em;
+}
+.sb-pick > span {
+  font-size: 0.78em;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+}
+.sb-pick > span small {
+  letter-spacing: 0;
+  font-size: 1em;
+  font-weight: 700;
+}
+.sb-seg {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 6px;
+}
+.sb-app .sb-seg .bui-key {
+  padding: 0 0.4em;
+}
+.sb-app .sb-seg .bui-key[aria-pressed="true"] {
+  background: var(--k-go);
+  color: var(--rim);
+}
+.sb-app .sb-seg .bui-key small {
+  display: block;
+  margin-top: 0.25em;
+  font-size: 0.72em;
+  letter-spacing: 0;
+  opacity: 0.8;
+}
+.sb-app .sb-seg.sb-tall .bui-key {
+  min-height: 56px;
+  flex-direction: column;
+}
+.sb-app .sb-go-key {
+  min-height: 56px !important;
+  font-size: 1.25em !important;
+  letter-spacing: 0.08em !important;
+}
+.sb-room label {
+  display: grid;
+  gap: 0.3em;
+  font-size: 0.78em;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+}
+.sb-room input {
+  min-height: 44px;
+  padding: 0 0.7em;
+  font: 800 1.15em/1 var(--sb-font);
+  letter-spacing: 0.06em;
+  color: var(--ink);
+  background: #ffffff;
+  border: 2px solid var(--rim);
+  border-radius: 8px;
+}
+.sb-room input:focus-visible {
+  outline: 3px solid var(--k-sys);
+  outline-offset: 1px;
+}
+.sb-rooms {
+  display: grid;
+  grid-template-columns: 44px 1fr 44px;
+  gap: 6px;
+  align-items: center;
+}
+.sb-rooms output {
+  display: grid;
+  place-items: center;
+  height: 44px;
+  font-size: 1.3em;
+  font-variant-numeric: tabular-nums;
+  background: var(--raised);
+  border: 2px solid var(--rim);
+  border-radius: 8px;
+}
+.sb-say {
+  min-height: 1.2em;
+  margin: 0;
+  font-weight: 700;
+  color: var(--sb-hit);
+}
+.sb-fine {
+  margin: 0;
+  font-size: 0.82em;
+  font-weight: 700;
+  color: var(--muted);
+}
+.sb-big {
+  margin: 0;
+  font-size: 1.15em;
+}
+.sb-seats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sb-seats li {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.55em 0.7em;
+  background: var(--raised);
+  border: 2px dashed var(--rim);
+  border-radius: 8px;
+}
+.sb-seats li.sb-in,
+.sb-seats li.sb-me {
+  border-style: solid;
+}
+.sb-seats li.sb-me {
+  background: var(--sb-you);
+}
+.sb-seats li.sb-in {
+  background: var(--sb-foe);
+}
+.sb-keysrow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.sb-keysrow > * {
+  flex: 1 1 auto;
+}
+/* The live room sticker over a match (top left, under the turn chip). */
+.sb-roomchip {
+  position: absolute;
+  left: max(10px, env(safe-area-inset-left));
+  bottom: 62px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.35em 0.7em;
+  font: 800 12px/1.2 var(--sb-font);
+  background: var(--surface);
+  border: 2px solid var(--rim);
+  border-radius: 8px;
+  box-shadow: calc(3px * var(--bui-sx)) calc(3px * var(--bui-sy)) 0 var(--bui-shadow);
+}
+.sb-roomchip[hidden] {
+  display: none;
+}
+.sb-roomchip i {
+  width: 0.7em;
+  height: 0.7em;
+  border-radius: 50%;
+  border: 2px solid var(--rim);
+  background: var(--k-go);
+}
+.sb-roomchip[data-conn="slow"] i {
+  background: var(--sb-sun);
+}
+.sb-roomchip[data-conn="lost"] i {
+  background: var(--sb-hit);
+}
+
+@container stage (aspect-ratio < 7 / 5) {
+  .sb-head {
+    right: 110px;
+  }
+  .sb-hud {
+    font-size: clamp(11px, 3.1cqw, 14px);
+  }
+  .sb-vl {
+    display: none;
+  }
+  .gk-bar {
+    justify-content: center;
+    gap: 4px;
+  }
+  .sb-app .gk {
+    flex: 1 1 0;
+    max-width: 168px;
+    padding: 0 4px;
+  }
+  .sb-app .gk[aria-label^="Mute"] {
+    flex: none;
+    margin-right: 0;
+  }
+  .sb-log {
+    left: 10px;
+    right: 10px;
+    width: auto;
+    top: auto;
+    bottom: 62px;
+    max-height: 38%;
+  }
+  .sb-roomchip {
+    bottom: auto;
+    top: 104px;
+  }
+}
+@container stage (max-width: 900px) {
+  .sb-log {
+    top: auto;
+    bottom: 62px;
+    max-height: 40%;
+  }
+}

@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>host</title>
+<style>body{margin:0;font:18px/1.5 system-ui,sans-serif;background:#fff;color:#151515}main{max-width:760px;margin:0 auto;padding:24px}</style></head>
+<body><main><h1>A perfectly normal page</h1><p>Some copy, with <a href="#away">a link</a>, for the game to sit over.</p><button type="button">Buy now</button><ul><li>One</li><li>Two</li></ul></main>
+<script>
+  // Frames: count requestAnimationFrame calls (the engine asks for one per frame it runs).
+  window.__frames = 0;
+  const raf = requestAnimationFrame.bind(window);
+  window.requestAnimationFrame = (fn) => raf((t) => (window.__frames++, fn(t)));
+</script>
+</body></html>
