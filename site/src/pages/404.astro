@@ -1,0 +1,18 @@
+---
+// Not found: the page the host serves (404.html at the root) for a path this site does not have.
+// Noindex in every build; links are absolute, so it works at any path.
+import Base from '../layouts/Base.astro';
+import { base } from '../site';
+---
+<Base title="Page not found" description="That page is not here." page="404" noindex>
+  <section class="section" aria-labelledby="nf-title">
+    <div class="wrap">
+      <h1 id="nf-title">Page not found</h1>
+      <p class="lead">That page is not here.</p>
+      <div class="ctas">
+        <a class="bui-key" href={base()}>HOME</a>
+        <a class="bui-key" href={base('play/')}>PLAY</a>
+      </div>
+    </div>
+  </section>
+</Base>

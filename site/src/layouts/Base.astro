@@ -6,8 +6,9 @@ import '../styles/site.css';
 import { VERSION, REPO, HUB, base } from '../site';
 const { title, description, page = 'home', app = false } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
-// Staging and PR previews (Cloudflare, PUBLIC_DEPLOY_TARGET=staging) stay out of search.
-const noindex = import.meta.env.PUBLIC_DEPLOY_TARGET === 'staging';
+// Staging and PR previews (Cloudflare, PUBLIC_DEPLOY_TARGET=staging) stay out of search, and so does a page
+// that asks (noindex: the not-found page).
+const noindex = Astro.props.noindex || import.meta.env.PUBLIC_DEPLOY_TARGET === 'staging';
 ---
 <!doctype html>
 <html lang="en" class="bui" data-theme="dark">

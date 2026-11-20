@@ -3,10 +3,12 @@
 // /play/ and its menu, the measured sizes are on the page, no page errors. SHOTS=<dir> saves them.
 import { chromium } from "playwright";
 import assert from "node:assert/strict";
-import { mkdirSync } from "node:fs";
+import { mkdirSync, readFileSync } from "node:fs";
 import { serve } from "./serve.mjs";
 
 const site = await serve("artifacts/pages"), SHOTS = process.env.SHOTS;
+// The not-found page (site/src/pages/404.astro): 404.html at the root, noindex, a key home.
+{ const nf = readFileSync("artifacts/pages/404.html", "utf8"); assert.ok(/<meta name="robots" content="noindex/.test(nf) && nf.includes('href="/"'), "404.html is noindex and links home"); }
 if (SHOTS) mkdirSync(SHOTS, { recursive: true });
 const browser = await chromium.launch(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {});
 try {
