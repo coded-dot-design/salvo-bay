@@ -16,7 +16,7 @@ const salvo = await css("src/salvo.css");
 const common = {
   define: { __KIT_CSS__: JSON.stringify(kit), __SALVO_CSS__: JSON.stringify(salvo) },
   bundle: true, minify: true, format: "esm", target: "es2022", legalComments: "none", logLevel: "warning",
-  banner: { js: `/* Salvo Bay ${version} · MIT © Chris Cooley · built on Fizlet */` },
+  banner: { js: `/* Salvo Bay ${version} · © Chris Cooley, all rights reserved · built on Fizlet */` },
 };
 await build({ ...common, entryPoints: ["src/index.ts"], outfile: "dist/salvo-bay.mjs" });
 await build({ ...common, entryPoints: ["src/hero.ts"], outfile: "dist/salvo-bay-hero.mjs" });

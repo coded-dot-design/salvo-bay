@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "description": "Salvo Bay: a ship-hunting duel on a cutaway tabletop diorama. Solo against the bot, pass and play, or online. Built on Fizlet, by Chris Cooley.",
-  "license": "MIT",
+  "license": "UNLICENSED",
   "author": "Chris Cooley (https://coded.design/)",
   "scripts": {
     "typecheck": "tsc --noEmit",
