@@ -1,5 +1,5 @@
 // Every build in dist/ stays under its budget (gzip). The game is a board game on the diorama brick:
-// its budget is measured, and a bump needs a measured reason (fizlet-factory docs/size-ledger.md).
+// its budget is measured, and a bump needs a measured reason (the Fizlet factory size ledger).
 import { gzipSync } from "node:zlib";
 import { readFileSync } from "node:fs";
 const BUDGET = { "dist/salvo-bay.mjs": 57344, "dist/salvo-bay-hero.mjs": 49152 };
