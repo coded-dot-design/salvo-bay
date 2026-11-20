@@ -5,8 +5,8 @@ water on a wooden plinth, a dock, a fort and a lighthouse. Hide your fleet, then
 arc over the table, splash, burst into fire and smoke, and sink ships you can still see on the
 bottom through the water. Orbit the table; at night the lighthouse sweeps the bay.
 
-By [Chris Cooley](https://coded.design/) · built on [Fizlet](https://github.com/coded-dot-design/fizlet) · MIT ·
-play it at [salvobay.domvirus.com](https://salvobay.domvirus.com/)
+By [Chris Cooley](https://coded.design/) · built on [Fizlet](https://github.com/fizlet/fzlt) · all rights reserved ·
+play it at [salvobay.fzlt.games](https://salvobay.fzlt.games/)
 
 ## Play
 
