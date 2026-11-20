@@ -6,6 +6,8 @@ import '../styles/site.css';
 import { VERSION, REPO, HUB, base } from '../site';
 const { title, description, page = 'home', app = false } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
+// Staging and PR previews (Cloudflare, PUBLIC_DEPLOY_TARGET=staging) stay out of search.
+const noindex = import.meta.env.PUBLIC_DEPLOY_TARGET === 'staging';
 ---
 <!doctype html>
 <html lang="en" class="bui" data-theme="dark">
@@ -16,6 +18,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
     <meta name="theme-color" content="#141a2c" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
